@@ -1,0 +1,38 @@
+# Python bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+venv/
+env/
+.env  # your environment variables file
+
+# Logs
+*.log
+logs/
+*.out
+*.err
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDEs
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Testing / coverage
+.coverage
+htmlcov/
+.tox/
+pytest_cache/
+
+# Database files (if any local SQLite used)
+*.db
+*.sqlite3
+
+# Docker / Docker Compose (optional if you don't want to include override files)
+docker-compose.override.yml
