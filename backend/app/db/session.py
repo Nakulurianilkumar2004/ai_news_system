@@ -9,7 +9,11 @@ for attempt in range(max_retries):
     try:
         engine = create_engine(
             settings.DATABASE_URL,
-            pool_pre_ping=True
+            pool_pre_ping=True,
+            connect_args={
+                "sslmode": "require",
+                "connect_timeout": 10
+            }
         )
         conn = engine.connect()  # Test DB connection
         conn.close()
