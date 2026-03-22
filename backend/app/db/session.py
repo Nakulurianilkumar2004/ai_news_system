@@ -2,23 +2,20 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from app.core.config import settings
 
+# Create engine (Supabase pooler compatible)
 engine = create_engine(
     settings.DATABASE_URL,
-    pool_size=2,        # Free-tier safe
-    max_overflow=0,
-    pool_timeout=30,
-    pool_pre_ping=True,
+    poolclass=None,              # ❗ Disable SQLAlchemy pooling (important)
+    pool_pre_ping=True,          # Helps avoid stale connections
     connect_args={
-        "sslmode": "require",
-        "connect_timeout": 10
+        "sslmode": "require"     # Required for Supabase
     }
 )
 
 # Test DB connection once
 try:
-    conn = engine.connect()
-    conn.close()
-    print("✅ Database connected successfully")
+    with engine.connect() as conn:
+        print("✅ Database connected successfully")
 except Exception as e:
     print(f"❌ Could not connect to database: {e}")
     raise e  # Fail startup immediately
@@ -29,7 +26,7 @@ SessionLocal = sessionmaker(
     autocommit=False,
     autoflush=False,
 )
-    
+
 # FastAPI dependency
 def get_db():
     db = SessionLocal()
