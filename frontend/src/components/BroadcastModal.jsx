@@ -1,6 +1,7 @@
 import { useState } from "react";
+import { broadcastNews } from "../api/api"; // same place as getFavorites
 
-export default function BroadcastModal({ news, onClose, onSend }) {
+export default function BroadcastModal({ news, onClose }) {
     const [channels, setChannels] = useState([]);
     const [loading, setLoading] = useState(false);
     const [results, setResults] = useState(null);
@@ -23,13 +24,20 @@ export default function BroadcastModal({ news, onClose, onSend }) {
         setResults(null);
 
         try {
-            const res = await onSend(news.id, channels);
+            // ✅ SAME PATTERN AS FAVORITES
+            const res = await broadcastNews(news.id, channels);
 
-            // ✅ store backend results
-            setResults(res.results || []);
+            setResults(res.data?.results || []);
+
         } catch (err) {
-            console.error(err);
-            alert("Broadcast failed");
+            console.error("🔥 Broadcast Error:", err);
+
+            const errorMsg =
+                err.response?.data?.detail ||
+                err.message ||
+                "Broadcast failed";
+
+            alert(errorMsg);
         } finally {
             setLoading(false);
         }
@@ -40,11 +48,11 @@ export default function BroadcastModal({ news, onClose, onSend }) {
             <div className="bg-white p-6 rounded-2xl w-96 shadow-lg">
                 <h2 className="text-lg font-bold mb-4">📣 Broadcast</h2>
 
-                {/* Channel Selection */}
                 {["email", "whatsapp", "linkedin", "blog", "newsletter"].map((ch) => (
                     <label key={ch} className="flex items-center gap-2 mb-2">
                         <input
                             type="checkbox"
+                            checked={channels.includes(ch)}
                             disabled={loading}
                             onChange={() => toggleChannel(ch)}
                         />
@@ -52,43 +60,50 @@ export default function BroadcastModal({ news, onClose, onSend }) {
                     </label>
                 ))}
 
-                {/* Send Button */}
                 <button
                     onClick={handleSend}
                     disabled={loading}
-                    className={`w-full py-2 rounded mt-4 text-white ${loading ? "bg-gray-400" : "bg-green-600 hover:bg-green-700"
+                    className={`w-full py-2 rounded mt-4 text-white ${loading
+                        ? "bg-gray-400"
+                        : "bg-green-600 hover:bg-green-700"
                         }`}
                 >
                     {loading ? "Sending..." : "Send"}
                 </button>
 
-                {/* ✅ Results Section */}
                 {results && (
                     <div className="mt-4 border-t pt-3">
                         <h3 className="font-semibold mb-2">Results:</h3>
 
-                        {results.map((r, i) => (
-                            <div
-                                key={i}
-                                className="flex justify-between text-sm mb-1"
-                            >
-                                <span className="capitalize">{r.channel}</span>
-
-                                <span
-                                    className={
-                                        r.status === "sent"
-                                            ? "text-green-600"
-                                            : "text-red-600"
-                                    }
+                        {results.length === 0 ? (
+                            <p className="text-sm text-gray-500">
+                                No results returned
+                            </p>
+                        ) : (
+                            results.map((r, i) => (
+                                <div
+                                    key={i}
+                                    className="flex justify-between text-sm mb-1"
                                 >
-                                    {r.status === "sent" ? "✅ Sent" : "❌ Failed"}
-                                </span>
-                            </div>
-                        ))}
+                                    <span className="capitalize">{r.channel}</span>
+
+                                    <span
+                                        className={
+                                            r.status === "sent"
+                                                ? "text-green-600"
+                                                : "text-red-600"
+                                        }
+                                    >
+                                        {r.status === "sent"
+                                            ? "✅ Sent"
+                                            : `❌ ${r.error || "Failed"}`}
+                                    </span>
+                                </div>
+                            ))
+                        )}
                     </div>
                 )}
 
-                {/* Close Button */}
                 <button
                     onClick={onClose}
                     className="w-full mt-4 text-gray-500"

@@ -43,6 +43,9 @@ export const addFavorite = (news_id) => API.post("/favorites/", null, { params: 
 
 // ===== BROADCAST =====
 export const broadcastNews = (news_id, channels) =>
-    API.post("/broadcast/", null, { params: { news_id, channels } });
+    API.post("/broadcast/", {
+        news_id,
+        channels,
+    });
 
 export default API;
