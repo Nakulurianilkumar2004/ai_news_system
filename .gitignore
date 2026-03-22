@@ -3,8 +3,7 @@ backend/__pycache__/
 backend/*.pyc
 backend/venv/
 backend/.env
-output/
-*.mp4
+
 
 # Node / frontend
 frontend/node_modules/
